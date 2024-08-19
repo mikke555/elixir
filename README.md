@@ -1,5 +1,6 @@
 # Elixir
 
+Comits entire elxETH balance to DeUSD conversion in the future
 
 ## Installation
 
