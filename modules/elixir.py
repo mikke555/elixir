@@ -1,4 +1,4 @@
-from modules.config import ELIXIR_ABI, logger
+from modules.config import ELIXIR_ABI, STDEUSD_ABI, logger
 from modules.utils import check_gas
 from modules.wallet import Wallet
 
@@ -9,6 +9,9 @@ class Elixir(Wallet):
         self.module_str += "Elixir |"
         self.contract = self.get_contract(
             address="0x652329cc4F00Af06a8020B41846d54a439A64620", abi=ELIXIR_ABI
+        )
+        self.stdeUSD = self.get_contract(
+            address="0x5C5b196aBE0d54485975D1Ec29617D42D9198326", abi=STDEUSD_ABI
         )
 
     def get_uncommitted_balance(self):
@@ -22,15 +25,31 @@ class Elixir(Wallet):
             logger.debug(f"{self.module_str} No balance to commit, skipping \n")
             return
 
-        try:
-            contract_tx = self.contract.functions.commitDeUSD(
-                balance
-            ).build_transaction(self.get_tx_data())
-
-        except Exception as error:
-            print(f"error building tx: {error}")
+        contract_tx = self.contract.functions.commitDeUSD(balance).build_transaction(
+            self.get_tx_data()
+        )
 
         return self.send_tx(
             contract_tx,
             tx_label=f"{self.module_str} commit {self.web3.from_wei(balance, 'ether')} elxETH to DeUSD",
+        )
+
+    def get_shares(self):
+        return self.stdeUSD.functions.balanceOf(self.address).call()
+
+    @check_gas
+    def withdraw_deUSD(self):
+        shares = self.get_shares()
+
+        if shares == 0:
+            logger.warning(f"{self.module_str} No balance to withdraw\n")
+            return False
+
+        contract_tx = self.stdeUSD.functions.cooldownShares(shares).build_transaction(
+            self.get_tx_data()
+        )
+
+        return self.send_tx(
+            contract_tx,
+            tx_label=f"{self.module_str} Withdraw deUSD",
         )

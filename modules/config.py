@@ -27,3 +27,6 @@ with open("data/abi/erc20.json") as f:
 
 with open("data/abi/elixir.json") as f:
     ELIXIR_ABI = json.load(f)
+
+with open("data/abi/stdeUSD.json") as f:
+    STDEUSD_ABI = json.load(f)
