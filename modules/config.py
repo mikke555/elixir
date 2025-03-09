@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from sys import stderr
 
 from loguru import logger
@@ -7,6 +8,10 @@ from web3 import Web3
 logger.remove()
 logger.add(
     stderr,
+    format="<white>{time:HH:mm:ss}</white> | <level>{message}</level>",
+)
+logger.add(
+    f"reports/log-{datetime.today().strftime('%Y-%m-%d')}.log",
     format="<white>{time:HH:mm:ss}</white> | <level>{message}</level>",
 )
 
